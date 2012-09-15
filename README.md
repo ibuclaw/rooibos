@@ -1,4 +1,4 @@
-rooibos
+Rooibos
 =======
 
-The rooibos progamming language
+The rooibos progamming language.
