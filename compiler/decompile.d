@@ -24,40 +24,9 @@ import std.string;
 
 string disassemble(OutBuffer bytecode)
 {
-  string DIS_START()()
-  {
-    return "string buffer = format (\"0x%.6x %s\", (current - bytecode.data.ptr), op_info[*current].name);" ~
-	   "current++;";
-  }
-
-  string GET_SIZE()()
-  {
-    return "buffer = format (\"%s %s\", buffer, *(cast(size_t *) current));"~
-	   "current += size_t.sizeof;";
-  }
-
-  string GET_NUMBER()()
-  {
-    return "buffer = format (\"%s %g\", buffer, *(cast(double *) current));"~
-	   "current += double.sizeof;";
-  }
-
-  string GET_STRING()()
-  {
-    return "size_t *plen = cast(size_t *)(bytecode.data.ptr + *(cast(size_t *) current));"~
-	   "char *ptr = cast(char *)(plen + 1);"~
-	   "buffer = format (\"%s %s\", buffer, cast(string)(ptr[0 .. *plen]));"~
-	   "current += size_t.sizeof;";
-  }
-
-  string DIS_END()()
-  {
-    return "str_stack ~= buffer;";
-  }
-
-
   string[] str_stack;
   str_stack.reserve (32);
+  string buffer;
 
   ubyte *current = bytecode.data.ptr;
   ubyte *end = &bytecode.data[$];
@@ -67,9 +36,10 @@ string disassemble(OutBuffer bytecode)
       switch (*current)
 	{
 	case OPintro:
-	  mixin (DIS_START);
-	  mixin (DIS_END);
-	  current += 4;
+	  buffer = format ("0x%.6x %s", (current - bytecode.data.ptr),
+			   op_info[*current].name);
+	  current += 5;
+	  str_stack ~= buffer;
 	  break;
 
 	case OPallocmodule:
@@ -92,29 +62,42 @@ string disassemble(OutBuffer bytecode)
 	case OPjifpop:
 	case OPjump:
 	case OPjinc:
-	  mixin (DIS_START);
-	  mixin (GET_SIZE);
-	  mixin (DIS_END);
+	  buffer = format ("0x%.6x %s", (current - bytecode.data.ptr),
+			   op_info[*current].name);
+	  current++;
+	  buffer = format ("%s %s", buffer, *(cast(size_t *) current));
+	  current += size_t.sizeof;
+	  str_stack ~= buffer;
 	  break;
 
 	case OPpushnum:
-	  mixin (DIS_START);
-	  mixin (GET_NUMBER);
-	  mixin (DIS_END);
+	  buffer = format ("0x%.6x %s", (current - bytecode.data.ptr),
+			   op_info[*current].name);
+	  current++;
+	  buffer = format ("%s %g", buffer, *(cast(double *) current));
+	  current += double.sizeof;
+	  str_stack ~= buffer;
 	  break;
 
 	case OPpushstr:
-	  mixin (DIS_START);
-	  mixin (GET_STRING);
-	  mixin (DIS_END);
+	  buffer = format ("0x%.6x %s", (current - bytecode.data.ptr),
+			   op_info[*current].name);
+	  current++;
+	  size_t *plen = cast(size_t *)(bytecode.data.ptr + *(cast(size_t *) current));
+	  char *ptr = cast(char *)(plen + 1);
+	  buffer = format ("%s %s", buffer, cast(string)(ptr[0 .. *plen]));
+	  current += size_t.sizeof;
+	  str_stack ~= buffer;
 	  break;
 
 	case OPpause:
 	  return str_stack.join("\n");
 
 	default:
-	  mixin (DIS_START);
-	  mixin (DIS_END);
+	  buffer = format ("0x%.6x %s", (current - bytecode.data.ptr),
+			   op_info[*current].name);
+	  current++;
+	  str_stack ~= buffer;
 	}
     }
 
