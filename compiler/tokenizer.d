@@ -23,7 +23,7 @@ import std.ascii;
 import std.conv;
 import std.stdio;
 
-enum : uint
+enum //BUG should be ': uint'
 {
   TOKor,	    //  or
   TOKand,	    //  and

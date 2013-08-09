@@ -30,7 +30,7 @@ int main(string[] args)
 {
   if (args.length != 2)
     {
-      stderr.writeln("Usage: %s file", args[0]);
+      stderr.writefln("Usage: %s file", args[0]);
       return 1;
     }
 

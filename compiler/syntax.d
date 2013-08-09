@@ -22,11 +22,11 @@ import std.array;
 import std.string;
 
 
-static const TOK[][] token_syntax = [
+static immutable TOK[][] token_syntax = [
     /* TOKor */		[						],
     /* TOKand */	[						],
     /* TOKdel */	[TOKidentifier					],
-    /* TOKsys */	[TOKdot],
+    /* TOKsys */	[TOKdot						],
     /* TOKtrap */	[TOKtrapped,	TOKsys,		TOKstartblock,
 			 TOKstring,	TOKnumber			],
     /* TOKargs */	[TOKlbracket					],
@@ -86,7 +86,7 @@ static const TOK[][] token_syntax = [
     /* TOKgt */		[TOKminus,	TOKidentifier,	TOKnumber	],
     /* TOKge */		[TOKminus,	TOKidentifier,	TOKnumber	],
     /* TOKcompare */	[						],
-    /* TOKexclamation */[TOKlparen,	TOKidentifier],
+    /* TOKexclamation */[TOKlparen,	TOKidentifier			],
     /* TOKne */		[TOKminus,	TOKnumber			],
     /* TOKlparen */	[TOKtrapped,	TOKminus,	TOKampand,
 			 TOKsys,	TOKlparen,	TOKrparen,
@@ -138,7 +138,7 @@ string syntax_check(Tokens* tokens, Token* current)
     return null;
 
   Token* last = tokens.tokens.back();
-  const TOK[] toks = token_syntax[last.type];
+  immutable TOK[] toks = token_syntax[last.type];
 
   foreach (tok; toks)
     {
